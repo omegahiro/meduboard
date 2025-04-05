@@ -124,7 +124,7 @@ onMounted(async () => {
   <!-- Display data if available -->
   <div v-if="Object.keys(groupedData).length > 0" class="group-container">
     <div v-for="(groupItems, groupKey) in groupedData" :key="groupKey" class="group-table">
-      <table border="1" style="border-collapse: collapse; width: 100%;">
+      <table border="1" style="border-collapse: collapse; width: 100px;">
         <thead>
           <tr>
             <th>{{ groupKey }}</th>
@@ -140,7 +140,7 @@ onMounted(async () => {
           }">
             <td>
               <!-- Display questionId and correct/incorrect counts -->
-              {{ item.questionId }} {{ item.correct }}|{{ item.incorrect }}
+              {{ item.questionId }} {{ item.correct }}/{{ item.incorrect }}
             </td>
           </tr>
         </tbody>
@@ -158,14 +158,14 @@ onMounted(async () => {
 /* Container for group tables (flex layout) */
 .group-container {
   display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
+  /* flex-wrap: wrap; */
+  gap: 10px;
   margin-top: 10px;
 }
 
 /* Individual group table as a card */
-.group-table {
+/* .group-table {
   flex: 0 0 calc((100% - (16px * 5)) / 6);
   box-sizing: border-box;
-}
+} */
 </style>
