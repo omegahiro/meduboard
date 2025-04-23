@@ -27,10 +27,15 @@ const fetchSheetData = async (sheetName) => {
   return await response.json()
 }
 
-// Compute stats per questionId from user's history
-const computeQuestionStats = (questionIds, history) => {
-  // Initialize stats object per questionId
-  const questionCount = questionIds.reduce((acc, qid) => {
+const computeQuestionStats = (questions, history) => {
+  // 質問IDとカテゴリのマップを作成
+  const questionMap = questions.reduce((acc, q) => {
+    acc[q['問題ID']] = { category: q['カテゴリ'] }
+    return acc
+  }, {})
+
+  // ステータス用に初期化
+  const questionCount = Object.keys(questionMap).reduce((acc, qid) => {
     acc[qid] = { correct: 0, incorrect: 0 }
     return acc
   }, {})
@@ -54,16 +59,17 @@ const computeQuestionStats = (questionIds, history) => {
     // Determine learning status
     const status =
       correct === 0 && incorrect === 0 ? 'unlearned' :
-        correct > 0 && incorrect === 0 ? 'correct' :
-          correct > incorrect ? 'reviewed' :
-            'incorrect'
+      correct > 0 && incorrect === 0 ? 'correct' :
+      correct > incorrect ? 'reviewed' :
+      'incorrect'
 
     return {
       questionId,
       correct,
       incorrect,
       status,
-      groupKey: questionId.slice(0, 4)
+      groupKey: questionId.slice(0, 4),
+      category: questionMap[questionId]?.category || ''
     }
   })
 }
@@ -98,7 +104,6 @@ onMounted(async () => {
   try {
     // Fetch question list
     const questions = await fetchSheetData('questions')
-    const questionIds = questions.map(q => q['問題ID'])
 
     // Fetch history list
     const history = await fetchSheetData('history')
@@ -107,7 +112,7 @@ onMounted(async () => {
     const filteredHistory = history.filter(entry => entry.userId === userId.value)
 
     // Compute question stats and group them
-    const questionStats = computeQuestionStats(questionIds, filteredHistory)
+    const questionStats = computeQuestionStats(questions, filteredHistory)
     groupedData.value = groupByKey(questionStats)
 
     console.log('Grouped Data:', groupedData.value)
@@ -124,7 +129,7 @@ onMounted(async () => {
   <!-- Display data if available -->
   <div v-if="Object.keys(groupedData).length > 0" class="group-container">
     <div v-for="(groupItems, groupKey) in groupedData" :key="groupKey" class="group-table">
-      <table border="1" style="border-collapse: collapse; width: 100px;">
+      <table border="1" style="border-collapse: collapse; width: 120px;">
         <thead>
           <tr>
             <th>{{ groupKey }}</th>
@@ -140,7 +145,7 @@ onMounted(async () => {
           }">
             <td>
               <!-- Display questionId and correct/incorrect counts -->
-              {{ item.questionId }} {{ item.correct }}/{{ item.incorrect }}
+              {{ item.questionId }}({{ item.category[0] }}) {{ item.correct }}/{{ item.incorrect }}
             </td>
           </tr>
         </tbody>
