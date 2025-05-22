@@ -102,7 +102,7 @@ onMounted(async () => {
 <style scoped>
 .group-container {
   display: flex;
-  flex-wrap: wrap;
+  /* flex-wrap: wrap; */
   gap: 10px;
   margin-top: 10px;
 }
